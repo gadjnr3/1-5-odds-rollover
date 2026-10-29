@@ -1,0 +1,63 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>1.50 Odds Rollover Tracker</title>
+<style>
+body{font-family:Arial,sans-serif;background:#101827;color:#fff;margin:0;padding:18px}
+h1{color:#50e3a4;font-size:25px}
+p{color:#cbd5e1}
+.card{background:#1e293b;padding:15px;border-radius:12px;margin:12px 0}
+.day{display:flex;align-items:center;gap:10px;border-bottom:1px solid #39465a;padding:14px 0}
+.day input{width:22px;height:22px;accent-color:#50e3a4}
+.info{flex:1}
+.name{font-weight:bold;font-size:15px}
+.amount{color:#50e3a4;margin-top:5px;font-size:14px}
+.small{font-size:13px;color:#cbd5e1}
+button{background:#50e3a4;color:#101827;border:0;border-radius:8px;padding:11px;font-weight:bold}
+</style>
+</head>
+<body>
+<h1>1.50 Odds Rollover</h1>
+<p>Starting stake: ₦500 · Target: ₦1,000,000</p>
+<div class="card">
+<div id="progress">Completed: 0 of 19 days</div>
+<div id="days"></div>
+<button onclick="resetProgress()">Reset progress</button>
+</div>
+<p class="small">Calculations assume the full return is rolled over at 1.50 odds every day. Actual betting results are not guaranteed.</p>
+<script>
+const start=500, odds=1.5, target=1000000;
+let amount=start, days=[];
+while(amount<target && days.length<30){
+ let next=Math.round(amount*odds);
+ days.push({day:days.length+1,stake:amount,returned:next});
+ amount=next;
+}
+const key='rollover150progress';
+function render(){
+ const saved=JSON.parse(localStorage.getItem(key)||'[]');
+ document.getElementById('days').innerHTML=days.map(d=>
+ `<label class="day">
+ <input type="checkbox" ${saved.includes(d.day)?'checked':''} onchange="toggleDay(${d.day},this.checked)">
+ <div class="info">
+ <div class="name">Day ${d.day}</div>
+ <div class="amount">₦${d.stake.toLocaleString('en-NG')} → ₦${d.returned.toLocaleString('en-NG')}</div>
+ </div></label>`).join('');
+ document.getElementById('progress').textContent=`Completed: ${saved.length} of ${days.length} days`;
+}
+function toggleDay(day,checked){
+ let saved=JSON.parse(localStorage.getItem(key)||'[]');
+ saved=checked?[...new Set([...saved,day])]:saved.filter(d=>d!==day);
+ localStorage.setItem(key,JSON.stringify(saved));render();
+}
+function resetProgress(){
+ if(confirm('Clear all completed days?')){localStorage.removeItem(key);render();}
+}
+render();
+</script>
+</body>
+  </html>
+  
